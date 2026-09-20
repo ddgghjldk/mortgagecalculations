@@ -3,39 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор страховой премии по кредиту</title>
+<title>Калькуляторы — страховая премия и проценты</title>
 <style>
+  :root,
+  html[data-theme="light"] {
+    --bg: #eef2f7;
+    --card-bg: #ffffff;
+    --card-border: transparent;
+    --card-shadow: 0 20px 60px rgba(0,0,0,0.12);
+
+    --text: #2d3748;
+    --text-head: #1a202c;
+    --text-label: #4a5568;
+    --text-muted: #718096;
+    --text-hint: #a0aec0;
+    --text-placeholder: #cbd5e0;
+
+    --input-bg: #f9fafb;
+    --input-border: #e2e8f0;
+    --input-focus-ring: rgba(74,85,104,0.12);
+
+    --block-bg: #f7fafc;
+    --divider: #edf2f7;
+    --dashed: #e2e8f0;
+
+    --toggle-bg: #ffffff;
+    --toggle-border: #e2e8f0;
+    --toggle-icon: #2d3748;
+    --toggle-shadow: 0 4px 16px rgba(45,55,72,0.12);
+  }
+
+
+  html[data-theme="dark"] {
+    --bg: #0b1220;
+    --card-bg: #14213d;
+    --card-border: #1e3a5f;
+    --card-shadow: 0 20px 60px rgba(0,0,0,0.5);
+
+    --text: #dbe4f0;
+    --text-head: #f1f5f9;
+    --text-label: #94a3b8;
+    --text-muted: #94a3b8;
+    --text-hint: #64748b;
+    --text-placeholder: #475569;
+
+    --input-bg: #0f1a30;
+    --input-border: #23406b;
+    --input-focus-ring: rgba(59,130,246,0.25);
+
+    --block-bg: #1a2b4a;
+    --divider: #23406b;
+    --dashed: #23406b;
+
+    --toggle-bg: #14213d;
+    --toggle-border: #23406b;
+    --toggle-icon: #dbe4f0;
+    --toggle-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    transition: background-color .3s ease;
+  }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background: #eef2f7;
+    background: var(--bg);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 24px 16px;
-    color: #2d3748;
+    padding: 28px 16px;
+    color: var(--text);
   }
-  .container {
-    background: #fff;
+
+  .page { max-width: 1280px; margin: 0 auto; }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    height: 44px;
+    border-radius: 22px;
+    border: 1.5px solid var(--toggle-border);
+    background: var(--toggle-bg);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--toggle-icon);
+    box-shadow: var(--toggle-shadow);
+    transition: transform .2s ease, box-shadow .2s ease, background-color .3s ease, border-color .3s ease, color .3s ease;
+    z-index: 1000;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .theme-toggle:hover {
+    transform: translateY(-2px);
+  }
+  .theme-toggle:active { transform: translateY(0) scale(0.97); }
+  .theme-toggle .toggle-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .page-header { text-align: center; margin-bottom: 28px; }
+  .page-header h1 { font-size: 26px; color: var(--text-head); margin-bottom: 6px; transition: color .3s ease; }
+  .page-header p { font-size: 14px; color: var(--text-muted); transition: color .3s ease; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card-bg);
     border-radius: 18px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-    width: 100%;
-    max-width: 680px;
-    padding: 32px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    padding: 28px;
+    transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
   }
-  h1 { font-size: 21px; text-align: center; margin-bottom: 6px; color: #1a202c; }
-  .subtitle { text-align: center; font-size: 13px; color: #718096; margin-bottom: 24px; }
+  .card h2 { font-size: 18px; color: var(--text-head); margin-bottom: 4px; transition: color .3s ease; }
+  .card .card-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+    line-height: 1.5;
+    transition: color .3s ease;
+  }
+  .card .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .card .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4299e1;
+    flex-shrink: 0;
+  }
+  .card.interest .dot { background: #48bb78; }
 
   .section-title {
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #4a5568;
+    color: var(--text-label);
     margin: 22px 0 12px;
     padding-bottom: 6px;
-    border-bottom: 2px solid #edf2f7;
+    border-bottom: 2px solid var(--divider);
+    transition: color .3s ease, border-color .3s ease;
   }
 
   .field { margin-bottom: 16px; }
@@ -43,57 +170,68 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--text-label);
     margin-bottom: 6px;
+    transition: color .3s ease;
   }
   label .cell-tag {
     display: inline-block;
-    background: #edf2f7;
-    color: #4a5568;
+    background: var(--divider);
+    color: var(--text-label);
     font-size: 10.5px;
     padding: 1px 7px;
     border-radius: 4px;
     margin-left: 6px;
     font-weight: 700;
     font-family: monospace;
+    transition: background-color .3s ease, color .3s ease;
   }
   .input-wrap { position: relative; }
   input, select {
     width: 100%;
     padding: 12px 14px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--input-border);
     border-radius: 10px;
     font-size: 15px;
-    transition: border-color .2s, box-shadow .2s;
-    background: #f9fafb;
-    color: #2d3748;
+    transition: border-color .2s, box-shadow .2s, background-color .3s ease, color .3s ease;
+    background: var(--input-bg);
+    color: var(--text);
     font-family: inherit;
+    font-weight: 500;
   }
-  input { padding-right: 60px; }
+  input[type="text"] { padding-right: 60px; }
   input:focus, select:focus {
     outline: none;
-    border-color: #4a5568;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(74,85,104,0.12);
+    border-color: #4a90d9;
+    background: var(--input-bg);
+    box-shadow: 0 0 0 4px var(--input-focus-ring);
   }
+  input::placeholder { color: var(--text-placeholder); font-weight: 400; transition: color .3s ease; }
+  select option { background: var(--card-bg); color: var(--text); }
   .unit {
     position: absolute;
     right: 14px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 13px;
-    color: #a0aec0;
+    color: var(--text-hint);
     font-weight: 600;
     pointer-events: none;
+    transition: color .3s ease;
   }
-  .hint { font-size: 11.5px; color: #a0aec0; margin-top: 4px; }
+  .hint { font-size: 11.5px; color: var(--text-hint); margin-top: 4px; transition: color .3s ease; }
 
   .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
+  .buttons-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
   .btn-calc {
-    width: 100%;
     padding: 14px;
-    margin-top: 12px;
     border: none;
     border-radius: 10px;
     font-size: 15px;
@@ -102,31 +240,50 @@
     background: #2d3748;
     color: #fff;
     box-shadow: 0 6px 18px rgba(45,55,72,0.25);
-    transition: all .2s;
+    transition: background .2s, box-shadow .2s, transform .1s;
     font-family: inherit;
   }
-  .btn-calc:hover { background: #1a202c; box-shadow: 0 8px 24px rgba(45,55,72,0.35); }
+  .btn-calc:hover { background: #1a202c; box-shadow: 0 8px 24px rgba(45,55,72,0.4); }
   .btn-calc:active { transform: scale(0.99); }
+  .btn-calc.full { width: 100%; }
+
+  .btn-reset {
+    padding: 14px 22px;
+    border: 2px solid var(--input-border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text-label);
+    transition: all .2s, background-color .3s ease, color .3s ease, border-color .3s ease;
+    font-family: inherit;
+  }
+  .btn-reset:hover { background: var(--block-bg); border-color: #4a90d9; }
 
   .results {
     margin-top: 26px;
-    border-top: 2px dashed #e2e8f0;
+    border-top: 2px dashed var(--dashed);
     padding-top: 22px;
+    transition: border-color .3s ease;
   }
-  .results h2 { font-size: 16px; margin-bottom: 14px; color: #2d3748; }
+  .results h3 { font-size: 15px; margin-bottom: 14px; color: var(--text); transition: color .3s ease; }
 
   .block {
-    background: #f7fafc;
+    background: var(--block-bg);
     border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 12px;
     border-left: 4px solid #4299e1;
+    transition: background-color .3s ease;
   }
+  .card.interest .block { border-left-color: #48bb78; }
+
   .block.total {
     border-left: none;
     background: #2d3748;
     color: #fff;
-    box-shadow: 0 8px 24px rgba(45,55,72,0.25);
+    box-shadow: 0 8px 24px rgba(45,55,72,0.3);
   }
   .block-title {
     font-size: 13px;
@@ -137,18 +294,24 @@
     align-items: center;
     color: #2b6cb0;
   }
+  .card.interest .block-title { color: #276749; }
   .block.total .block-title { color: #fff; font-size: 14px; }
 
   .block-title .rate-pill {
-    background: #fff;
+    background: var(--card-bg);
     color: inherit;
     font-size: 11px;
     padding: 2px 8px;
     border-radius: 20px;
     font-family: monospace;
     border: 1px solid currentColor;
+    transition: background-color .3s ease;
   }
-  .block.total .block-title .rate-pill { background: rgba(255,255,255,0.2); border-color: transparent; color: #fff; }
+  .block.total .block-title .rate-pill {
+    background: rgba(255,255,255,0.2);
+    border-color: transparent;
+    color: #fff;
+  }
 
   .breakdown {
     display: grid;
@@ -156,19 +319,27 @@
     gap: 6px 14px;
     font-size: 13.5px;
   }
-  .breakdown .label { color: #4a5568; }
+  .breakdown .label { color: var(--text-label); transition: color .3s ease; }
   .breakdown .val {
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--text);
     text-align: right;
+    transition: color .3s ease;
   }
-  .breakdown .label.big { font-weight: 700; color: #1a202c; font-size: 14.5px; }
+  .breakdown .label.big { font-weight: 700; color: var(--text-head); font-size: 14.5px; transition: color .3s ease; }
+
   .breakdown .val.big {
     font-size: 17px;
-    color: #2b6cb0;
+    color: #4299e1;
     font-weight: 800;
   }
+  .card.interest .breakdown .val.big { color: #48bb78; }
+
+  .block.total .breakdown .label,
+  .block.total .breakdown .label.big { color: rgba(255,255,255,0.8); }
+  .block.total .breakdown .val,
+  .block.total .breakdown .val.big { color: #fff; }
 
   .total-amount {
     display: flex;
@@ -185,15 +356,16 @@
   .formula {
     margin-top: 14px;
     font-size: 12px;
-    color: #4a5568;
-    background: #f7fafc;
+    color: var(--text-label);
+    background: var(--block-bg);
     padding: 12px 14px;
     border-radius: 10px;
     line-height: 1.8;
-    border-left: 3px solid #4a5568;
+    border-left: 3px solid #4299e1;
     font-family: 'SF Mono', Consolas, monospace;
+    transition: background-color .3s ease, color .3s ease;
   }
-  .formula b { color: #1a202c; }
+  .formula b { color: var(--text-head); transition: color .3s ease; }
 
   .toast {
     position: fixed;
@@ -215,86 +387,191 @@
 
   @media (max-width: 480px) {
     .row-2col { grid-template-columns: 1fr; }
-    .container { padding: 22px 18px; }
+    .card { padding: 22px 18px; }
+    .buttons-row { grid-template-columns: 1fr; }
+    .theme-toggle { top: 12px; right: 12px; padding: 8px 12px; height: 40px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Калькулятор страховой премии</h1>
-  <p class="subtitle">Недвижимость + Жизнь · расчёт от остатка ссудной задолженности (ОСД)</p>
+<button type="button" class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+  <span class="toggle-icon" id="themeIcon">◐</span>
+  <span id="themeLabel">Светлая</span>
+</button>
 
-  <div class="section-title">Исходные данные</div>
-
-  <div class="field">
-    <label>Остаток ссудной задолженности (ОСД) <span class="cell-tag">J27</span></label>
-    <div class="input-wrap">
-      <input type="text" inputmode="decimal" id="debt" value="3000000">
-      <span class="unit">руб.</span>
-    </div>
-    <div class="hint">Можно с пробелами или без: 3 000 000 или 3000000</div>
+<div class="page">
+  <div class="page-header">
+    <h1>Калькуляторы по кредиту</h1>
+    <p>Страховая премия · Начисленные проценты</p>
   </div>
 
-  <div class="row-2col">
-    <div class="field">
-      <label>Ставка «Недвижимость»</label>
-      <div class="input-wrap">
-        <input type="text" inputmode="decimal" id="rateImu" value="0,15">
-        <span class="unit">% год.</span>
+  <div class="grid">
+    <div class="card insurance">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>Страховая премия</h2>
       </div>
-      <div class="hint">Фиксированная: 0,15%</div>
+      <p class="card-sub">Недвижимость + Жизнь · расчёт от остатка ссудной задолженности (ОСД)</p>
+
+      <div class="section-title">Исходные данные</div>
+
+      <div class="field">
+        <label>Остаток ссудной задолженности (ОСД) <span class="cell-tag">J27</span></label>
+        <div class="input-wrap">
+          <input type="text" inputmode="decimal" id="debt" value="3000000">
+          <span class="unit">руб.</span>
+        </div>
+        <div class="hint">Можно с пробелами или без</div>
+      </div>
+
+      <div class="row-2col">
+        <div class="field">
+          <label>Ставка «Недвижимость»</label>
+          <div class="input-wrap">
+            <input type="text" inputmode="decimal" id="rateImu" value="0,15">
+            <span class="unit">% год.</span>
+          </div>
+          <div class="hint">Фиксированная: 0,15%</div>
+        </div>
+
+        <div class="field">
+          <label>Ставка «Жизнь» <span class="cell-tag">L25</span></label>
+          <div class="input-wrap">
+            <input type="text" inputmode="decimal" id="rateLife" value="0,15">
+            <span class="unit">% год.</span>
+          </div>
+          <div class="hint">Значение из ячейки L25</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Период расчёта</label>
+        <select id="period">
+          <option value="30" selected>Месяц (30 дней)</option>
+          <option value="7">Неделя (7 дней)</option>
+          <option value="1">День (1 день)</option>
+          <option value="365">Год (365 дней)</option>
+        </select>
+        <div class="hint">В исходной формуле Excel используется 30 дней</div>
+      </div>
+
+      <button type="button" class="btn-calc full" id="calcBtn">Рассчитать</button>
+
+      <div class="results">
+        <h3>Результаты расчёта</h3>
+
+        <div class="block">
+          <div class="block-title">
+            <span>Недвижимость (имущество)</span>
+            <span class="rate-pill" id="pillImu">0,15%</span>
+          </div>
+          <div class="breakdown" id="brImu"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <span>Жизнь</span>
+            <span class="rate-pill" id="pillLife">0,15%</span>
+          </div>
+          <div class="breakdown" id="brLife"></div>
+        </div>
+
+        <div class="block total">
+          <div class="total-amount">
+            <span>Итого за <span id="periodLabel">30 дн.</span>:</span>
+            <span class="value" id="totalValue">— руб.</span>
+          </div>
+        </div>
+
+        <div class="formula" id="formula"></div>
+      </div>
+    </div>
+    <div class="card interest">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>Начисленные проценты</h2>
+      </div>
+      <p class="card-sub">Расчёт процентов за период по количеству дней или по датам</p>
+
+      <div class="section-title">Исходные данные</div>
+
+      <div class="field">
+        <label>Сумма основного долга</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="decimal" id="loan-amount" placeholder="3 000 000">
+          <span class="unit">руб.</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Годовая процентная ставка</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="decimal" id="interest-rate" placeholder="14,5">
+          <span class="unit">% год.</span>
+        </div>
+      </div>
+
+      <div class="row-2col">
+        <div class="field">
+          <label>Дата начала</label>
+          <input type="date" id="start-date">
+        </div>
+        <div class="field">
+          <label>Дата окончания</label>
+          <input type="date" id="end-date">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Количество дней</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="numeric" id="days-count" placeholder="30">
+          <span class="unit">дн.</span>
+        </div>
+        <div class="hint">Меняется автоматически при изменении дат — или задайте вручную</div>
+      </div>
+
+      <div class="buttons-row">
+        <button type="button" class="btn-calc" id="calculate-btn">Рассчитать</button>
+        <button type="button" class="btn-reset" id="reset-btn">Сбросить</button>
+      </div>
+
+      <div class="results" id="result-section" style="display:none;">
+        <h3>Результаты расчёта</h3>
+
+        <div class="block">
+          <div class="block-title">
+            <span>Параметры расчёта</span>
+          </div>
+          <div class="breakdown">
+            <span class="label">Сумма основного долга</span>
+            <span class="val" id="result-principal">—</span>
+            <span class="label">Период начисления</span>
+            <span class="val" id="result-period">—</span>
+            <span class="label">Проценты в день</span>
+            <span class="val" id="result-daily">—</span>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <span>Начисленные проценты</span>
+          </div>
+          <div class="breakdown">
+            <span class="label big">Сумма процентов за период</span>
+            <span class="val big" id="result-interest">—</span>
+          </div>
+        </div>
+
+        <div class="block total">
+          <div class="total-amount">
+            <span>Итого к оплате:</span>
+            <span class="value" id="result-total">—</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="field">
-      <label>Ставка «Жизнь» <span class="cell-tag">L25</span></label>
-      <div class="input-wrap">
-        <input type="text" inputmode="decimal" id="rateLife" value="0,15">
-        <span class="unit">% год.</span>
-      </div>
-      <div class="hint">Значение из ячейки L25</div>
-    </div>
-  </div>
-
-  <div class="field">
-    <label>Период расчёта</label>
-    <select id="period">
-      <option value="30" selected>Месяц (30 дней)</option>
-      <option value="7">Неделя (7 дней)</option>
-      <option value="1">День (1 день)</option>
-      <option value="365">Год (365 дней)</option>
-    </select>
-    <div class="hint">В исходной формуле Excel используется 30 дней</div>
-  </div>
-
-  <button type="button" class="btn-calc" id="calcBtn">Рассчитать</button>
-
-  <div class="results">
-    <h2>Результаты расчёта</h2>
-
-    <div class="block imu">
-      <div class="block-title">
-        <span>Недвижимость (имущество)</span>
-        <span class="rate-pill" id="pillImu">0,15%</span>
-      </div>
-      <div class="breakdown" id="brImu"></div>
-    </div>
-
-    <div class="block life">
-      <div class="block-title">
-        <span>Жизнь</span>
-        <span class="rate-pill" id="pillLife">0,15%</span>
-      </div>
-      <div class="breakdown" id="brLife"></div>
-    </div>
-
-    <div class="block total">
-      <div class="total-amount">
-        <span>Итого за <span id="periodLabel">30 дн.</span>:</span>
-        <span class="value" id="totalValue">— руб.</span>
-      </div>
-    </div>
-
-    <div class="formula" id="formula"></div>
   </div>
 </div>
 
@@ -304,42 +581,94 @@
   (function() {
     'use strict';
 
-    const $ = id => document.getElementById(id);
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var icon = document.getElementById('themeIcon');
+    var label = document.getElementById('themeLabel');
 
-    const fmt = n => new Intl.NumberFormat('ru-RU', {
+    var MODES = ['light', 'dark'];
+    var META = {
+      light: { icon: '◐', label: 'Светлая' },
+      dark:  { icon: '☾', label: 'Тёмная' }
+    };
+
+    function safeGet(key) {
+      try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function safeSet(key, value) {
+      try { localStorage.setItem(key, value); } catch (e) {}
+    }
+
+    function applyTheme(mode) {
+      if (MODES.indexOf(mode) === -1) mode = 'light';
+      root.setAttribute('data-theme', mode);
+      var meta = META[mode];
+      icon.textContent = meta.icon;
+      label.textContent = meta.label;
+      btn.title = 'Тема: ' + meta.label + ' (клик — переключить)';
+      btn.setAttribute('aria-label', btn.title);
+    }
+
+    // Если сохранена старая тема "white" — сбрасываем в "light"
+    var currentMode = safeGet('theme');
+    if (MODES.indexOf(currentMode) === -1) currentMode = 'light';
+    applyTheme(currentMode);
+
+    btn.addEventListener('click', function() {
+      currentMode = currentMode === 'light' ? 'dark' : 'light';
+      safeSet('theme', currentMode);
+      applyTheme(currentMode);
+
+      var t = document.getElementById('toast');
+      if (t) {
+        t.textContent = '🎨 ' + META[currentMode].label + ' тема';
+        t.classList.add('show');
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() { t.classList.remove('show'); }, 1400);
+      }
+    });
+  })();
+
+  var $ = function(id) { return document.getElementById(id); };
+
+  function parseNum(str) {
+    if (str === null || str === undefined) return NaN;
+    var clean = String(str).replace(/\s/g, '').replace(',', '.');
+    var n = parseFloat(clean);
+    return isNaN(n) ? NaN : n;
+  }
+
+  function fmt(n) {
+    return new Intl.NumberFormat('ru-RU', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(n) + ' руб.';
+  }
 
-    const fmtRate = r => String(r).replace('.', ',') + '%';
+  function fmtRate(r) {
+    return String(r).replace('.', ',') + '%';
+  }
 
-    function parseNum(str) {
-      if (str === null || str === undefined) return 0;
-      const clean = String(str).replace(/\s/g, '').replace(',', '.');
-      const n = parseFloat(clean);
-      return isNaN(n) ? 0 : n;
-    }
-
-    function showToast(text) {
-      const t = $('toast');
-      t.textContent = text;
-      t.classList.add('show');
-      clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.remove('show'), 1600);
-    }
-
+  function showToast(text) {
+    var t = $('toast');
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.classList.remove('show'); }, 1600);
+  }
+  (function() {
     function calculate(silent) {
       try {
-        const debt = parseNum($('debt').value);
-        const rateImu = parseNum($('rateImu').value);
-        const rateLife = parseNum($('rateLife').value);
-        const days = parseInt($('period').value, 10) || 30;
+        var debt = parseNum($('debt').value) || 0;
+        var rateImu = parseNum($('rateImu').value) || 0;
+        var rateLife = parseNum($('rateLife').value) || 0;
+        var days = parseInt($('period').value, 10) || 30;
 
-        const imu = (rateImu / 100) * debt / 365 * days;
-        const life = (rateLife / 100) * debt / 365 * days;
-        const total = imu + life;
-        const imuDay = (rateImu / 100) * debt / 365;
-        const lifeDay = (rateLife / 100) * debt / 365;
+        var imu = (rateImu / 100) * debt / 365 * days;
+        var life = (rateLife / 100) * debt / 365 * days;
+        var total = imu + life;
+        var imuDay = (rateImu / 100) * debt / 365;
+        var lifeDay = (rateLife / 100) * debt / 365;
 
         $('pillImu').textContent = fmtRate(rateImu);
         $('pillLife').textContent = fmtRate(rateLife);
@@ -366,29 +695,120 @@
         $('formula').innerHTML =
           '<b>Формулы (как в Excel):</b><br>' +
           'Недвижимость = ' + fmtRate(rateImu) + '/100 × ОСД/365 × ' + days + '<br>' +
-          '&nbsp;&nbsp;→ =' + String(rateImu).replace('.', ',') + '/100*J27/365*' + days + ' = <b>' + fmt(imu) + '</b><br>' +
+          '&nbsp;&nbsp;→ =' + String(rateImu).replace('.', ',') + '/100*J27/365*' + days +
+          ' = <b>' + fmt(imu) + '</b><br>' +
           'Жизнь = L25/100 × ОСД/365 × ' + days + '<br>' +
-          '&nbsp;&nbsp;→ =' + String(rateLife).replace('.', ',') + '/100*J27/365*' + days + ' = <b>' + fmt(life) + '</b><br>' +
+          '&nbsp;&nbsp;→ =' + String(rateLife).replace('.', ',') + '/100*J27/365*' + days +
+          ' = <b>' + fmt(life) + '</b><br>' +
           'ИТОГО = <b>' + fmt(total) + '</b>';
 
-        if (!silent) showToast('✓ Рассчитано');
+        if (!silent) showToast('✓ Страховая премия рассчитана');
       } catch (e) {
-        console.error('Ошибка расчёта:', e);
+        console.error(e);
         showToast('Ошибка: ' + e.message);
       }
     }
 
-    $('calcBtn').addEventListener('click', function() {
-      calculate(false);
+    $('calcBtn').addEventListener('click', function() { calculate(false); });
+    ['debt', 'rateImu', 'rateLife'].forEach(function(id) {
+      $(id).addEventListener('input', function() { calculate(true); });
     });
-
-    ['debt', 'rateImu', 'rateLife', 'period'].forEach(function(id) {
-      const el = $(id);
-      el.addEventListener('input', function() { calculate(true); });
-      el.addEventListener('change', function() { calculate(true); });
-    });
+    $('period').addEventListener('change', function() { calculate(true); });
 
     calculate(true);
+  })();
+
+  (function() {
+    function formatDate(date) {
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, '0');
+      var day = String(date.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
+    function updateDaysFromDates() {
+      var startVal = $('start-date').value;
+      var endVal = $('end-date').value;
+      if (!startVal || !endVal) return;
+      var startDate = new Date(startVal);
+      var endDate = new Date(endVal);
+      if (startDate && endDate && startDate <= endDate) {
+        var diff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+        $('days-count').value = diff;
+      }
+    }
+
+    function updateDatesFromDays() {
+      var days = parseNum($('days-count').value);
+      var endVal = $('end-date').value;
+      if (days > 0 && endVal) {
+        var endDate = new Date(endVal);
+        var startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - days);
+        $('start-date').value = formatDate(startDate);
+      }
+    }
+
+    function calculateInterest() {
+      var principal = parseNum($('loan-amount').value);
+      var annualRate = parseNum($('interest-rate').value);
+      var days = parseInt($('days-count').value, 10);
+
+      if (!principal || !annualRate || !days) {
+        showToast('Заполните все поля');
+        return;
+      }
+      if (principal <= 0 || annualRate <= 0 || days <= 0) {
+        showToast('Значения должны быть положительными');
+        return;
+      }
+
+      var dailyRate = annualRate / 365 / 100;
+      var interest = principal * dailyRate * days;
+      var totalAmount = principal + interest;
+      var dailyInterest = interest / days;
+
+      $('result-principal').textContent = fmt(principal);
+      $('result-period').textContent = days + ' дн.';
+      $('result-interest').textContent = fmt(interest);
+      $('result-total').textContent = fmt(totalAmount);
+      $('result-daily').textContent = fmt(dailyInterest) + ' / день';
+
+      $('result-section').style.display = 'block';
+      showToast('✓ Проценты рассчитаны');
+    }
+
+    function resetCalculator() {
+      $('loan-amount').value = '';
+      $('interest-rate').value = '';
+
+      var today = new Date();
+      var thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+
+      $('start-date').value = formatDate(thirtyDaysAgo);
+      $('end-date').value = formatDate(today);
+      $('days-count').value = 30;
+
+      $('result-section').style.display = 'none';
+      showToast('Форма сброшена');
+    }
+
+    (function initDates() {
+      var today = new Date();
+      var thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+
+      $('start-date').value = formatDate(thirtyDaysAgo);
+      $('end-date').value = formatDate(today);
+      $('days-count').value = 30;
+    })();
+
+    $('calculate-btn').addEventListener('click', calculateInterest);
+    $('reset-btn').addEventListener('click', resetCalculator);
+    $('start-date').addEventListener('change', updateDaysFromDates);
+    $('end-date').addEventListener('change', updateDaysFromDates);
+    $('days-count').addEventListener('input', updateDatesFromDays);
   })();
 </script>
 </body>
