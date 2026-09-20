@@ -103,6 +103,7 @@
     color: #fff;
     box-shadow: 0 6px 18px rgba(45,55,72,0.25);
     transition: all .2s;
+    font-family: inherit;
   }
   .btn-calc:hover { background: #1a202c; box-shadow: 0 8px 24px rgba(45,55,72,0.35); }
   .btn-calc:active { transform: scale(0.99); }
@@ -194,7 +195,6 @@
   }
   .formula b { color: #1a202c; }
 
-  /* ===== Промо-блок с кнопкой перехода ===== */
   .promo-block {
     margin-top: 22px;
     padding: 20px;
@@ -216,6 +216,7 @@
   }
   .promo-title { font-size: 16px; font-weight: 700; color: #ffffff; }
   .promo-desc { font-size: 12.5px; color: #b0b0b0; line-height: 1.5; }
+
   .promo-btn {
     display: inline-flex;
     align-items: center;
@@ -232,12 +233,17 @@
     transition: all 0.25s ease;
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.35);
     width: 100%;
+    border: none;
+    font-family: inherit;
   }
   .promo-btn:hover {
     background: #e6c200;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+    color: #333333;
   }
+  .promo-btn:active { transform: translateY(0); }
+  .promo-btn:visited { color: #333333; }
   .promo-arrow { font-size: 18px; transition: transform 0.25s ease; }
   .promo-btn:hover .promo-arrow { transform: translateX(4px); }
 
@@ -254,6 +260,25 @@
     .row-2col { grid-template-columns: 1fr; }
     .container { padding: 22px 18px; }
   }
+
+  /* Тост */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #2d3748;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: all .35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -269,7 +294,7 @@
       <input type="text" inputmode="decimal" id="debt" value="3000000">
       <span class="unit">руб.</span>
     </div>
-    <div class="hint">Можно вводить с пробелами или без: 3 000 000 или 3000000</div>
+    <div class="hint">Можно с пробелами или без: 3 000 000 или 3000000</div>
   </div>
 
   <div class="row-2col">
@@ -303,7 +328,7 @@
     <div class="hint">В исходной формуле Excel используется 30 дней</div>
   </div>
 
-  <button class="btn-calc" onclick="calculate()">Рассчитать</button>
+  <button type="button" class="btn-calc" id="calcBtn">Рассчитать</button>
 
   <div class="results">
     <h2>Результаты расчёта</h2>
@@ -332,79 +357,123 @@
     </div>
 
     <div class="formula" id="formula"></div>
-    
+
+    <div class="promo-block">
+      <div class="promo-text">
+        <span class="promo-label">Калькулятор Т-Банка</span>
+        <span class="promo-title">Расчёт начисленных процентов по ипотеке</span>
+        <span class="promo-desc">Рассчитайте проценты за любой период по датам или количеству дней</span>
+      </div>
+      <a id="promoLink"
+         href="https://kirieshka456.github.io/mortgagecalculations/"
+         class="promo-btn">
+        <span>Перейти в калькулятор</span>
+        <span class="promo-arrow">→</span>
+      </a>
+    </div>
   </div>
 </div>
 
+<div class="toast" id="toast">✓ Рассчитано</div>
+
 <script>
-  const fmt = n => new Intl.NumberFormat('ru-RU', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(n) + ' руб.';
+  (function() {
+    'use strict';
 
-  const fmtRate = r => String(r).replace('.', ',') + '%';
+    const $ = id => document.getElementById(id);
 
-  function parseNum(str) {
-    if (str === null || str === undefined) return 0;
-    const clean = String(str).replace(/\s/g, '').replace(',', '.');
-    const n = parseFloat(clean);
-    return isNaN(n) ? 0 : n;
-  }
+    const fmt = n => new Intl.NumberFormat('ru-RU', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(n) + ' руб.';
 
-  function calculate() {
-    const debt = parseNum(document.getElementById('debt').value);
-    const rateImu = parseNum(document.getElementById('rateImu').value);
-    const rateLife = parseNum(document.getElementById('rateLife').value);
-    const days = parseInt(document.getElementById('period').value, 10) || 30;
-    const periodLabel = document.getElementById('period').selectedOptions[0].text;
+    const fmtRate = r => String(r).replace('.', ',') + '%';
 
-    const imu = (rateImu / 100) * debt / 365 * days;
-    const life = (rateLife / 100) * debt / 365 * days;
-    const total = imu + life;
+    function parseNum(str) {
+      if (str === null || str === undefined) return 0;
+      const clean = String(str).replace(/\s/g, '').replace(',', '.');
+      const n = parseFloat(clean);
+      return isNaN(n) ? 0 : n;
+    }
 
-    const imuDay = (rateImu / 100) * debt / 365;
-    const lifeDay = (rateLife / 100) * debt / 365;
+    function showToast(text) {
+      const t = $('toast');
+      t.textContent = text;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 1600);
+    }
 
-    document.getElementById('pillImu').textContent = fmtRate(rateImu);
-    document.getElementById('pillLife').textContent = fmtRate(rateLife);
-    document.getElementById('periodLabel').textContent = days + ' дн.';
+    function calculate(silent) {
+      try {
+        const debt = parseNum($('debt').value);
+        const rateImu = parseNum($('rateImu').value);
+        const rateLife = parseNum($('rateLife').value);
+        const days = parseInt($('period').value, 10) || 30;
+        const periodLabel = $('period').selectedOptions[0].text;
 
-    document.getElementById('brImu').innerHTML = `
-      <span class="label">Ставка / 100 / 365 × ОСД × ${days}</span>
-      <span class="val">—</span>
-      <span class="label">Стоимость за 1 день</span>
-      <span class="val">${fmt(imuDay)}</span>
-      <span class="label big">Премия за период</span>
-      <span class="val big">${fmt(imu)}</span>
-    `;
+        const imu = (rateImu / 100) * debt / 365 * days;
+        const life = (rateLife / 100) * debt / 365 * days;
+        const total = imu + life;
+        const imuDay = (rateImu / 100) * debt / 365;
+        const lifeDay = (rateLife / 100) * debt / 365;
 
-    document.getElementById('brLife').innerHTML = `
-      <span class="label">Ставка / 100 / 365 × ОСД × ${days}</span>
-      <span class="val">—</span>
-      <span class="label">Стоимость за 1 день</span>
-      <span class="val">${fmt(lifeDay)}</span>
-      <span class="label big">Премия за период</span>
-      <span class="val big">${fmt(life)}</span>
-    `;
+        $('pillImu').textContent = fmtRate(rateImu);
+        $('pillLife').textContent = fmtRate(rateLife);
+        $('periodLabel').textContent = days + ' дн.';
 
-    document.getElementById('totalValue').textContent = fmt(total);
+        $('brImu').innerHTML =
+          '<span class="label">Ставка / 100 / 365 × ОСД × ' + days + '</span>' +
+          '<span class="val">—</span>' +
+          '<span class="label">Стоимость за 1 день</span>' +
+          '<span class="val">' + fmt(imuDay) + '</span>' +
+          '<span class="label big">Премия за период</span>' +
+          '<span class="val big">' + fmt(imu) + '</span>';
 
-    document.getElementById('formula').innerHTML = `
-      <b>Формулы (как в Excel):</b><br>
-      Недвижимость = ${fmtRate(rateImu)}/100 × ОСД/365 × ${days}<br>
-      &nbsp;&nbsp;→ =${String(rateImu).replace('.', ',')}/100*J27/365*${days} = <b>${fmt(imu)}</b><br>
-      Жизнь = L25/100 × ОСД/365 × ${days}<br>
-      &nbsp;&nbsp;→ =${String(rateLife).replace('.', ',')}/100*J27/365*${days} = <b>${fmt(life)}</b><br>
-      ИТОГО = <b>${fmt(total)}</b>
-    `;
-  }
+        $('brLife').innerHTML =
+          '<span class="label">Ставка / 100 / 365 × ОСД × ' + days + '</span>' +
+          '<span class="val">—</span>' +
+          '<span class="label">Стоимость за 1 день</span>' +
+          '<span class="val">' + fmt(lifeDay) + '</span>' +
+          '<span class="label big">Премия за период</span>' +
+          '<span class="val big">' + fmt(life) + '</span>';
 
-  ['debt','rateImu','rateLife'].forEach(id =>
-    document.getElementById(id).addEventListener('input', calculate)
-  );
-  document.getElementById('period').addEventListener('change', calculate);
+        $('totalValue').textContent = fmt(total);
 
-  calculate();
+        $('formula').innerHTML =
+          '<b>Формулы (как в Excel):</b><br>' +
+          'Недвижимость = ' + fmtRate(rateImu) + '/100 × ОСД/365 × ' + days + '<br>' +
+          '&nbsp;&nbsp;→ =' + String(rateImu).replace('.', ',') + '/100*J27/365*' + days + ' = <b>' + fmt(imu) + '</b><br>' +
+          'Жизнь = L25/100 × ОСД/365 × ' + days + '<br>' +
+          '&nbsp;&nbsp;→ =' + String(rateLife).replace('.', ',') + '/100*J27/365*' + days + ' = <b>' + fmt(life) + '</b><br>' +
+          'ИТОГО = <b>' + fmt(total) + '</b>';
+
+        if (!silent) showToast('✓ Рассчитано');
+      } catch (e) {
+        console.error('Ошибка расчёта:', e);
+        showToast('Ошибка: ' + e.message);
+      }
+    }
+
+    $('calcBtn').addEventListener('click', function() {
+      calculate(false);
+    });
+
+
+    ['debt', 'rateImu', 'rateLife', 'period'].forEach(function(id) {
+      const el = $(id);
+      el.addEventListener('input', function() { calculate(true); });
+      el.addEventListener('change', function() { calculate(true); });
+    });
+
+    $('promoLink').addEventListener('click', function(e) {
+      const href = this.href;
+      setTimeout(function() {
+      }, 100);
+    });
+
+    calculate(true);
+  })();
 </script>
 </body>
 </html>
