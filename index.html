@@ -195,73 +195,6 @@
   }
   .formula b { color: #1a202c; }
 
-  .promo-block {
-    margin-top: 22px;
-    padding: 20px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #333333 0%, #444444 100%);
-    border-bottom: 4px solid #FFD700;
-    box-shadow: 0 8px 24px rgba(51, 51, 51, 0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .promo-text { display: flex; flex-direction: column; gap: 4px; }
-  .promo-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #FFD700;
-  }
-  .promo-title { font-size: 16px; font-weight: 700; color: #ffffff; }
-  .promo-desc { font-size: 12.5px; color: #b0b0b0; line-height: 1.5; }
-
-  .promo-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 22px;
-    border-radius: 10px;
-    background: #FFD700;
-    color: #333333;
-    font-size: 15px;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.35);
-    width: 100%;
-    border: none;
-    font-family: inherit;
-  }
-  .promo-btn:hover {
-    background: #e6c200;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
-    color: #333333;
-  }
-  .promo-btn:active { transform: translateY(0); }
-  .promo-btn:visited { color: #333333; }
-  .promo-arrow { font-size: 18px; transition: transform 0.25s ease; }
-  .promo-btn:hover .promo-arrow { transform: translateX(4px); }
-
-  @media (min-width: 480px) {
-    .promo-block {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .promo-btn { width: auto; white-space: nowrap; }
-  }
-
-  @media (max-width: 480px) {
-    .row-2col { grid-template-columns: 1fr; }
-    .container { padding: 22px 18px; }
-  }
-
-  /* Тост */
   .toast {
     position: fixed;
     bottom: 30px;
@@ -279,6 +212,11 @@
     z-index: 999;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) {
+    .row-2col { grid-template-columns: 1fr; }
+    .container { padding: 22px 18px; }
+  }
 </style>
 </head>
 <body>
@@ -357,20 +295,6 @@
     </div>
 
     <div class="formula" id="formula"></div>
-
-    <div class="promo-block">
-      <div class="promo-text">
-        <span class="promo-label">Калькулятор Т-Банка</span>
-        <span class="promo-title">Расчёт начисленных процентов по ипотеке</span>
-        <span class="promo-desc">Рассчитайте проценты за любой период по датам или количеству дней</span>
-      </div>
-      <a id="promoLink"
-         href="https://kirieshka456.github.io/mortgagecalculations/"
-         class="promo-btn">
-        <span>Перейти в калькулятор</span>
-        <span class="promo-arrow">→</span>
-      </a>
-    </div>
   </div>
 </div>
 
@@ -410,7 +334,6 @@
         const rateImu = parseNum($('rateImu').value);
         const rateLife = parseNum($('rateLife').value);
         const days = parseInt($('period').value, 10) || 30;
-        const periodLabel = $('period').selectedOptions[0].text;
 
         const imu = (rateImu / 100) * debt / 365 * days;
         const life = (rateLife / 100) * debt / 365 * days;
@@ -459,17 +382,10 @@
       calculate(false);
     });
 
-
     ['debt', 'rateImu', 'rateLife', 'period'].forEach(function(id) {
       const el = $(id);
       el.addEventListener('input', function() { calculate(true); });
       el.addEventListener('change', function() { calculate(true); });
-    });
-
-    $('promoLink').addEventListener('click', function(e) {
-      const href = this.href;
-      setTimeout(function() {
-      }, 100);
     });
 
     calculate(true);
