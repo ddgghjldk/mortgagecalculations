@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор страховой премии по кредиту</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #eef2f7;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px;
+    color: #2d3748;
+  }
+  .container {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 680px;
+    padding: 32px;
+  }
+  h1 { font-size: 21px; text-align: center; margin-bottom: 6px; color: #1a202c; }
+  .subtitle { text-align: center; font-size: 13px; color: #718096; margin-bottom: 24px; }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #4a5568;
+    margin: 22px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #edf2f7;
+  }
+
+  .field { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 6px;
+  }
+  label .cell-tag {
+    display: inline-block;
+    background: #edf2f7;
+    color: #4a5568;
+    font-size: 10.5px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-weight: 700;
+    font-family: monospace;
+  }
+  .input-wrap { position: relative; }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: border-color .2s, box-shadow .2s;
+    background: #f9fafb;
+    color: #2d3748;
+    font-family: inherit;
+  }
+  input { padding-right: 60px; }
+  input:focus, select:focus {
+    outline: none;
+    border-color: #4a5568;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(74,85,104,0.12);
+  }
+  .unit {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: #a0aec0;
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .hint { font-size: 11.5px; color: #a0aec0; margin-top: 4px; }
+
+  .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .btn-calc {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #2d3748;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(45,55,72,0.25);
+    transition: all .2s;
+  }
+  .btn-calc:hover { background: #1a202c; box-shadow: 0 8px 24px rgba(45,55,72,0.35); }
+  .btn-calc:active { transform: scale(0.99); }
+
+  .results {
+    margin-top: 26px;
+    border-top: 2px dashed #e2e8f0;
+    padding-top: 22px;
+  }
+  .results h2 { font-size: 16px; margin-bottom: 14px; color: #2d3748; }
+
+  .block {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border-left: 4px solid #4299e1;
+  }
+  .block.total {
+    border-left: none;
+    background: #2d3748;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(45,55,72,0.25);
+  }
+  .block-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #2b6cb0;
+  }
+  .block.total .block-title { color: #fff; font-size: 14px; }
+
+  .block-title .rate-pill {
+    background: #fff;
+    color: inherit;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: monospace;
+    border: 1px solid currentColor;
+  }
+  .block.total .block-title .rate-pill { background: rgba(255,255,255,0.2); border-color: transparent; color: #fff; }
+
+  .breakdown {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 14px;
+    font-size: 13.5px;
+  }
+  .breakdown .label { color: #4a5568; }
+  .breakdown .val {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: #2d3748;
+    text-align: right;
+  }
+  .breakdown .label.big { font-weight: 700; color: #1a202c; font-size: 14.5px; }
+  .breakdown .val.big {
+    font-size: 17px;
+    color: #2b6cb0;
+    font-weight: 800;
+  }
+
+  .total-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+  }
+  .total-amount .value {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .formula {
+    margin-top: 14px;
+    font-size: 12px;
+    color: #4a5568;
+    background: #f7fafc;
+    padding: 12px 14px;
+    border-radius: 10px;
+    line-height: 1.8;
+    border-left: 3px solid #4a5568;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+  .formula b { color: #1a202c; }
+
+  /* ===== Промо-блок с кнопкой перехода ===== */
+  .promo-block {
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #333333 0%, #444444 100%);
+    border-bottom: 4px solid #FFD700;
+    box-shadow: 0 8px 24px rgba(51, 51, 51, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .promo-text { display: flex; flex-direction: column; gap: 4px; }
+  .promo-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #FFD700;
+  }
+  .promo-title { font-size: 16px; font-weight: 700; color: #ffffff; }
+  .promo-desc { font-size: 12.5px; color: #b0b0b0; line-height: 1.5; }
+  .promo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 10px;
+    background: #FFD700;
+    color: #333333;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.35);
+    width: 100%;
+  }
+  .promo-btn:hover {
+    background: #e6c200;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+  }
+  .promo-arrow { font-size: 18px; transition: transform 0.25s ease; }
+  .promo-btn:hover .promo-arrow { transform: translateX(4px); }
+
+  @media (min-width: 480px) {
+    .promo-block {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .promo-btn { width: auto; white-space: nowrap; }
+  }
+
+  @media (max-width: 480px) {
+    .row-2col { grid-template-columns: 1fr; }
+    .container { padding: 22px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Калькулятор страховой премии</h1>
+  <p class="subtitle">Недвижимость + Жизнь · расчёт от остатка ссудной задолженности (ОСД)</p>
+
+  <div class="section-title">Исходные данные</div>
+
+  <div class="field">
+    <label>Остаток ссудной задолженности (ОСД) <span class="cell-tag">J27</span></label>
+    <div class="input-wrap">
+      <input type="text" inputmode="decimal" id="debt" value="3000000">
+      <span class="unit">руб.</span>
+    </div>
+    <div class="hint">Можно вводить с пробелами или без: 3 000 000 или 3000000</div>
+  </div>
+
+  <div class="row-2col">
+    <div class="field">
+      <label>Ставка «Недвижимость»</label>
+      <div class="input-wrap">
+        <input type="text" inputmode="decimal" id="rateImu" value="0,15">
+        <span class="unit">% год.</span>
+      </div>
+      <div class="hint">Фиксированная: 0,15%</div>
+    </div>
+
+    <div class="field">
+      <label>Ставка «Жизнь» <span class="cell-tag">L25</span></label>
+      <div class="input-wrap">
+        <input type="text" inputmode="decimal" id="rateLife" value="0,15">
+        <span class="unit">% год.</span>
+      </div>
+      <div class="hint">Значение из ячейки L25</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Период расчёта</label>
+    <select id="period">
+      <option value="30" selected>Месяц (30 дней)</option>
+      <option value="7">Неделя (7 дней)</option>
+      <option value="1">День (1 день)</option>
+      <option value="365">Год (365 дней)</option>
+    </select>
+    <div class="hint">В исходной формуле Excel используется 30 дней</div>
+  </div>
+
+  <button class="btn-calc" onclick="calculate()">Рассчитать</button>
+
+  <div class="results">
+    <h2>Результаты расчёта</h2>
+
+    <div class="block imu">
+      <div class="block-title">
+        <span>Недвижимость (имущество)</span>
+        <span class="rate-pill" id="pillImu">0,15%</span>
+      </div>
+      <div class="breakdown" id="brImu"></div>
+    </div>
+
+    <div class="block life">
+      <div class="block-title">
+        <span>Жизнь</span>
+        <span class="rate-pill" id="pillLife">0,15%</span>
+      </div>
+      <div class="breakdown" id="brLife"></div>
+    </div>
+
+    <div class="block total">
+      <div class="total-amount">
+        <span>Итого за <span id="periodLabel">30 дн.</span>:</span>
+        <span class="value" id="totalValue">— руб.</span>
+      </div>
+    </div>
+
+    <div class="formula" id="formula"></div>
+    
+  </div>
+</div>
+
+<script>
+  const fmt = n => new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(n) + ' руб.';
+
+  const fmtRate = r => String(r).replace('.', ',') + '%';
+
+  function parseNum(str) {
+    if (str === null || str === undefined) return 0;
+    const clean = String(str).replace(/\s/g, '').replace(',', '.');
+    const n = parseFloat(clean);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function calculate() {
+    const debt = parseNum(document.getElementById('debt').value);
+    const rateImu = parseNum(document.getElementById('rateImu').value);
+    const rateLife = parseNum(document.getElementById('rateLife').value);
+    const days = parseInt(document.getElementById('period').value, 10) || 30;
+    const periodLabel = document.getElementById('period').selectedOptions[0].text;
+
+    const imu = (rateImu / 100) * debt / 365 * days;
+    const life = (rateLife / 100) * debt / 365 * days;
+    const total = imu + life;
+
+    const imuDay = (rateImu / 100) * debt / 365;
+    const lifeDay = (rateLife / 100) * debt / 365;
+
+    document.getElementById('pillImu').textContent = fmtRate(rateImu);
+    document.getElementById('pillLife').textContent = fmtRate(rateLife);
+    document.getElementById('periodLabel').textContent = days + ' дн.';
+
+    document.getElementById('brImu').innerHTML = `
+      <span class="label">Ставка / 100 / 365 × ОСД × ${days}</span>
+      <span class="val">—</span>
+      <span class="label">Стоимость за 1 день</span>
+      <span class="val">${fmt(imuDay)}</span>
+      <span class="label big">Премия за период</span>
+      <span class="val big">${fmt(imu)}</span>
+    `;
+
+    document.getElementById('brLife').innerHTML = `
+      <span class="label">Ставка / 100 / 365 × ОСД × ${days}</span>
+      <span class="val">—</span>
+      <span class="label">Стоимость за 1 день</span>
+      <span class="val">${fmt(lifeDay)}</span>
+      <span class="label big">Премия за период</span>
+      <span class="val big">${fmt(life)}</span>
+    `;
+
+    document.getElementById('totalValue').textContent = fmt(total);
+
+    document.getElementById('formula').innerHTML = `
+      <b>Формулы (как в Excel):</b><br>
+      Недвижимость = ${fmtRate(rateImu)}/100 × ОСД/365 × ${days}<br>
+      &nbsp;&nbsp;→ =${String(rateImu).replace('.', ',')}/100*J27/365*${days} = <b>${fmt(imu)}</b><br>
+      Жизнь = L25/100 × ОСД/365 × ${days}<br>
+      &nbsp;&nbsp;→ =${String(rateLife).replace('.', ',')}/100*J27/365*${days} = <b>${fmt(life)}</b><br>
+      ИТОГО = <b>${fmt(total)}</b>
+    `;
+  }
+
+  ['debt','rateImu','rateLife'].forEach(id =>
+    document.getElementById(id).addEventListener('input', calculate)
+  );
+  document.getElementById('period').addEventListener('change', calculate);
+
+  calculate();
+</script>
+</body>
+</html>
